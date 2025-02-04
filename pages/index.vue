@@ -7,40 +7,12 @@
 
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
-import { ref, onMounted, onBeforeUnmount, onUpdated } from 'vue'
-import { useNuxtApp } from "#app";
-import { collection, getDocs } from "firebase/firestore";
+import { onMounted, onBeforeUnmount, onUpdated } from 'vue'
+import { useHorses } from "~/composables/useHorses";
+import { useGacha } from "~/composables/useGacha"
 
-// Firebaseの設定は plugins/firebase.tsに分けたので、useNuxtApp()を使ってプラグインを取得する
-const { $firestore } = useNuxtApp();
-
-// ref()：任意の値の型を取り、「.value」 プロパティの下で内部の値を公開するオブジェクトを作成することができる
-const horseNames = ref([]);
-
-// Firestore（Firebase）から horses コレクションのデータを取得し、horseNames 変数に格納する
-const fetchHorses = async () => {
-  try {
-    // getDocs() は Firestore のデータを取得する関数
-    // await を使うことで、Firestoreからデータを取得するのを待つ
-    // Firestoreの "horses" コレクションを指定
-    // $firestore は Firebase Firestoreのインスタンス
-    const querySnapshot = await getDocs(collection($firestore, "horses"));
-
-    // Firestoreのデータから name だけを取り出して、配列 horseNames.value に格納
-    horseNames.value = querySnapshot.docs.map(doc => doc.data().name);
-
-    console.log("Firestoreデータ取得成功:", horseNames.value);
-  } catch (error) {
-    console.error("Firestoreデータ取得エラー:", error);
-  }
-};
-
-// ガチャで選ばれた馬の名前を保持する
-const selectedHorse = ref(null);
-// ガチャが回転中かどうかを示すフラグ（true: ガチャが回っている状態）
-const isRolling = ref(false);
-
-let timer = null;
+const { horseNames, fetchHorses } = useHorses();
+const { selectedHorse, isRolling, startGacha } = useGacha(horseNames);
 
 // ライフサイクルフック
 // コンポーネントがマウントされた後に実行
@@ -60,25 +32,6 @@ onBeforeUnmount(() => {
   // clearInterval(): setInterval()でセットしたタイマーを解除する
   if (timer) clearInterval(timer);
 });
-
-// ガチャを回す処理
-const startGacha = () => {
-  isRolling.value = true;
-
-  // 100ms（0.1秒）ごとにランダムな馬名を選択
-  timer = setInterval(() => { // setInterval()：指定された時間間隔（ミリ秒単位）で関数またはコードスニペットを繰り返し実行する
-    selectedHorse.value = horseNames.value[Math.floor(Math.random() * horseNames.value.length)];
-  }, 100);
-
-  // 2秒後にガチャを停止
-  setTimeout(() => {
-    // 現在動いている setInterval()を止める → 馬名がランダムに変わり続けてしまうため
-    clearInterval(timer);
-    timer = null;
-    // ガチャの回転が終わったことを示す。falseにすることで、ボタンを再び押せる状態にする。
-    isRolling.value = false;
-  }, 2000);
-};
 </script>
 
 <!-- コンポーネントのビュー部分を定義 -->
