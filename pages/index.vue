@@ -8,17 +8,21 @@
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
 import { onMounted, onBeforeUnmount, onUpdated } from 'vue'
-import { useHorses } from "~/composables/useHorses";
+import { useScrapedHorses } from "~/composables/useScrapedHorses";
 import { useGacha } from "~/composables/useGacha"
 
-const { horseNames, fetchHorses } = useHorses();
-const { selectedHorse, isRolling, startGacha } = useGacha(horseNames);
+// スクレイピングデータを取得
+const { scrapedHorseNames, isLoading, fetchScrapedHorses } = useScrapedHorses();
+// ガチャのロジックを適用
+const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames);
 
 // ライフサイクルフック
 // コンポーネントがマウントされた後に実行
 onMounted(() => {
-  fetchHorses();
+  // ページがマウントされたらスクレイピングデータを取得
+  fetchScrapedHorses();
   console.log('ガチャページがマウントされました！');
+  console.log('スクレイピングデータを取得しました！');
 });
 
 // コンポーネントの状態が更新された時に実行
@@ -39,9 +43,20 @@ onBeforeUnmount(() => {
   <div class="container">
     <h1>🏇 高知ファイナル 本命馬決定ガチャ 🏇</h1>
 
-    <!-- v-if：要素を条件付きでレンダリングする -->
-    <p v-if="selectedHorse">結果：<strong>{{ selectedHorse }}</strong></p>
-    <button @click="startGacha" :disabled="isRolling">ガチャを回す</button>
+    <!-- スクレイピング中は「loading...」を表示 -->
+    <h2 v-if="isLoading" class="display-loading">🔄 loading...</h2>
+
+    <!-- スクレイピングが完了したらボタンを表示 -->
+    <template v-else>
+      <!-- ガチャ結果を表示 -->
+      <!-- v-if：要素を条件付きでレンダリングする -->
+      <p v-if="selectedHorse">
+        <span v-if="!isRolling">結果：</span><strong>{{ selectedHorse }}</strong>
+      </p>
+      <button @click="startGacha" :disabled="isRolling || scrapedHorseNames.length === 0">
+        ガチャを回す
+      </button>
+    </template>
   </div>
 </template>
 
@@ -52,6 +67,11 @@ onBeforeUnmount(() => {
 .container {
   text-align: center;
   margin-top: 50px;
+}
+
+.display-loading {
+  padding: 10px 20px;
+  margin-top: 20px;
 }
 
 button {

@@ -10,6 +10,8 @@ export function useGacha(horseNames: Ref<string[]>) { // horseNamesに型を指�
 
   // ガチャを回す処理
   const startGacha = () => {
+    if (horseNames.value.length === 0) return;
+    
     isRolling.value = true;
 
     // 100ms（0.1秒）ごとにランダムな馬名を選択
