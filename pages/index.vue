@@ -38,12 +38,6 @@ onMounted(() => {
   fetchScrapedHorses(); // スクレイピングを実行
   startLoadingAnimation(); // ローディングアニメーションを開始
 });
-
-// コンポーネントが削除された後に実行
-onUnmounted(() => {
-  // タイマーをクリア
-  clearInterval(loadingInterval);
-});
 </script>
 
 <!-- コンポーネントのビュー部分を定義 -->
