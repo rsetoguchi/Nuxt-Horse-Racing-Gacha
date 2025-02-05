@@ -86,15 +86,14 @@ onUnmounted(() => {
 
 /* ページ全体の背景を黒にする */
 body {
-  padding: 30px;
   text-align: center;
   background: #000;
   background-color: black;
   color: white; /* 文字色も調整（黒背景だと見づらいため） */
 }
 
-
 #index-page-title {
+  margin: 0;
   font-size: 60px;
   font-family: 'ヒラギノ明朝 Pro W3', 'Hiragino Mincho Pro', 'Hiragino Mincho ProN', 'HGS明朝E', 'ＭＳ Ｐ明朝', serif;
   position: relative;
@@ -108,7 +107,7 @@ body {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 4px;
+  height: 6px;
   content: '';
   background-image: -webkit-linear-gradient(315deg, #704308 0%, #ffce08 40%, #e1ce08 60%, #704308 100%);
   background-image: linear-gradient(135deg, #704308 0%, #ffce08 40%, #e1ce08 60%, #704308 100%);
@@ -124,8 +123,8 @@ body {
 
 /* コンテナ全体を中央に配置 */
 .container {
+  margin: 0;
   text-align: center;
-  margin-top: 50px;
   background-color: black;
   color: white; /* 文字色も白に */
   min-height: 100vh; /* 画面全体を黒にするため */
