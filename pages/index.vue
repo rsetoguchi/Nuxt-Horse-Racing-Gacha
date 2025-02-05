@@ -7,19 +7,18 @@
 
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
-import { onMounted } from 'vue'
+import { onMounted } from 'vue';
 import { useScrapedHorses } from "~/composables/useScrapedHorses";
-import { useGacha } from "~/composables/useGacha"
+import { useGacha } from "~/composables/useGacha";
 
 // スクレイピングデータを取得するカスタムフック
 const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
 const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames); // ガチャのロジックを適用
 
 // ライフサイクルフック
-// 初回ページ読み込み時にスクレイピング実行
 onMounted(() => {
-  // ページがマウントされたらスクレイピングデータを取得
   console.log('ガチャページがマウントされました！');
+  fetchScrapedHorses(); // ページがマウントされたらスクレイピングを実行
 });
 </script>
 

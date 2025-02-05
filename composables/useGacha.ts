@@ -1,17 +1,17 @@
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 export function useGacha(horseNames: Ref<string[]>) { // horseNamesに型を指定する
   // ガチャで選ばれた馬の名前を保持する
-  const selectedHorse = ref<string | null>(null); // 型を string | null にする
+  const selectedHorse = ref<string | null>(null);
   // ガチャが回転中かどうかを示すフラグ（true: ガチャが回っている状態）
   const isRolling = ref(false);
   // setInterval() のタイマーIDを格納し、管理するための変数
-  let timer: number | null = null; // 型を number | null にする
+  let timer: number | null = null;
 
   // ガチャを回す処理
   const startGacha = () => {
     if (horseNames.value.length === 0) return;
-    
+
     isRolling.value = true;
 
     // 100ms（0.1秒）ごとにランダムな馬名を選択

@@ -1,4 +1,4 @@
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted } from 'vue';
 
 export function useScrapedHorses() {
   const scrapedHorseNames = ref<string[]>([]);
@@ -15,6 +15,7 @@ export function useScrapedHorses() {
       errorMessage.value = null;
 
       // APIリクエスト
+      console.log('スクレイピングAPIリクエスト中...');
       const response = await fetch('/api/scrape');
       const data = await response.json();
 
@@ -27,15 +28,9 @@ export function useScrapedHorses() {
       errorMessage.value = 'スクレイピングに失敗しました';
     } finally {
       isLoading.value = false; // スクレイピング完了
+      console.log('スクレイピング処理完了');
     }
   };
-
-  // ライフサイクルフック
-  // コンポーネントがマウントされた後に実行
-  onMounted(() => {
-    fetchScrapedHorses();
-    console.log('スクレイピングデータを取得しました！');
-  });
 
   return { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses };
 }
