@@ -7,34 +7,19 @@
 
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
-import { onMounted, onBeforeUnmount, onUpdated } from 'vue'
+import { onMounted } from 'vue'
 import { useScrapedHorses } from "~/composables/useScrapedHorses";
 import { useGacha } from "~/composables/useGacha"
 
-// スクレイピングデータを取得
-const { scrapedHorseNames, isLoading, fetchScrapedHorses } = useScrapedHorses();
-// ガチャのロジックを適用
-const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames);
+// スクレイピングデータを取得するカスタムフック
+const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
+const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames); // ガチャのロジックを適用
 
 // ライフサイクルフック
-// コンポーネントがマウントされた後に実行
+// 初回ページ読み込み時にスクレイピング実行
 onMounted(() => {
   // ページがマウントされたらスクレイピングデータを取得
-  fetchScrapedHorses();
   console.log('ガチャページがマウントされました！');
-  console.log('スクレイピングデータを取得しました！');
-});
-
-// コンポーネントの状態が更新された時に実行
-onUpdated(() => {
-  console.log('ページの状態が更新されました！');
-});
-
-// コンポーネントが削除される直前に実行
-onBeforeUnmount(() => {
-  console.log('ページがアンマウントされます...');
-  // clearInterval(): setInterval()でセットしたタイマーを解除する
-  if (timer) clearInterval(timer);
 });
 </script>
 
@@ -45,6 +30,9 @@ onBeforeUnmount(() => {
 
     <!-- スクレイピング中は「loading...」を表示 -->
     <h2 v-if="isLoading" class="display-loading">🔄 loading...</h2>
+
+    <!-- エラーメッセージの表示 -->
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
     <!-- スクレイピングが完了したらボタンを表示 -->
     <template v-else>
@@ -64,6 +52,7 @@ onBeforeUnmount(() => {
 <style scoped>
 /* scoped属性を追加することで、このコンポーネントのスタイルが他のコンポーネントに影響を与えないようにする */
 
+/* コンテナ全体を中央に配置 */
 .container {
   text-align: center;
   margin-top: 50px;
@@ -74,10 +63,15 @@ onBeforeUnmount(() => {
   margin-top: 20px;
 }
 
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
 button {
   padding: 10px 20px;
   font-size: 18px;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 50px;
 }
 </style>

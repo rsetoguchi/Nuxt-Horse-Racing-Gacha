@@ -1,27 +1,41 @@
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 export function useScrapedHorses() {
   const scrapedHorseNames = ref<string[]>([]);
   // スクレイピング実行中のフラグ
   const isLoading = ref(true);
+  // エラーメッセージ用
+  const errorMessage = ref<string | null>(null);
 
   const fetchScrapedHorses = async () => {
     try {
-      isLoading.value = true; // スクレイピング開始
+      // スクレイピング開始
+      isLoading.value = true;
+      // エラーをリセット
+      errorMessage.value = null;
+
+      // APIリクエスト
       const response = await fetch('/api/scrape');
       const data = await response.json();
 
       if (data.horses) {
         scrapedHorseNames.value = data.horses;
       } else {
-        console.error('スクレイピング結果が取得できません:', data.error);
+        errorMessage.value = data.error;
       }
     } catch (error) {
-      console.error('スクレイピングAPIエラー:', error);
+      errorMessage.value = 'スクレイピングに失敗しました';
     } finally {
       isLoading.value = false; // スクレイピング完了
     }
   };
 
-  return { scrapedHorseNames, isLoading, fetchScrapedHorses };
+  // ライフサイクルフック
+  // コンポーネントがマウントされた後に実行
+  onMounted(() => {
+    fetchScrapedHorses();
+    console.log('スクレイピングデータを取得しました！');
+  });
+
+  return { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses };
 }
