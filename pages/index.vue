@@ -25,25 +25,29 @@ onMounted(() => {
 <!-- コンポーネントのビュー部分を定義 -->
 <template>
   <div class="container">
-    <h1>🏇 高知ファイナル 本命馬決定ガチャ 🏇</h1>
+    <h1 id="index-page-title">🏇 高知ファイナル 本命馬決定ガチャ 🏇</h1>
 
-    <!-- スクレイピング中は「loading...」を表示 -->
-    <h2 v-if="isLoading" class="display-loading">🔄 loading...</h2>
+    <div class="message-area">
+      <!-- スクレイピング中は「loading...」を表示 -->
+      <p v-if="isLoading" class="display-loading">🔄 loading...</p>
 
-    <!-- エラーメッセージの表示 -->
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <!-- スクレイピング中は「loading...」を表示 -->
+      <p v-else-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-    <!-- スクレイピングが完了したらボタンを表示 -->
-    <template v-else>
       <!-- ガチャ結果を表示 -->
-      <!-- v-if：要素を条件付きでレンダリングする -->
-      <p v-if="selectedHorse">
-        <span v-if="!isRolling">結果：</span><strong>{{ selectedHorse }}</strong>
+      <p v-else-if="selectedHorse">
+        <span v-if="!isRolling">🎉🎉🎉 </span>
+        <strong>{{ selectedHorse }}</strong>
+        <span v-if="!isRolling"> 🎉🎉🎉</span>
       </p>
-      <button @click="startGacha" :disabled="isRolling || scrapedHorseNames.length === 0">
-        ガチャを回す
-      </button>
-    </template>
+
+      <!-- ボタン押下前のテンプレート -->
+      <p v-else class="placeholder">ガチャを回して結果を見よう！</p>
+    </div>
+
+    <button @click="startGacha" :disabled="isRolling || scrapedHorseNames.length === 0">
+      ガチャを回す
+    </button>
   </div>
 </template>
 
@@ -51,15 +55,35 @@ onMounted(() => {
 <style scoped>
 /* scoped属性を追加することで、このコンポーネントのスタイルが他のコンポーネントに影響を与えないようにする */
 
+#index-page-title {
+  font-size: 60px
+}
+
 /* コンテナ全体を中央に配置 */
 .container {
   text-align: center;
   margin-top: 50px;
 }
 
-.display-loading {
-  padding: 10px 20px;
-  margin-top: 20px;
+/* メッセージエリアの高さを固定 */
+.message-area {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  margin: 70px 0;
+}
+
+.display-loading, .placeholder {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+/* デフォルトのメッセージ（ボタン位置がずれないように空白を埋める） */
+.placeholder {
+  color: #e58be5;
 }
 
 .error-message {
@@ -69,8 +93,7 @@ onMounted(() => {
 
 button {
   padding: 10px 20px;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
-  margin-top: 50px;
 }
 </style>
