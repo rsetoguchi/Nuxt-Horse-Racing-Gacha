@@ -30,6 +30,41 @@ const startLoadingAnimation = () => {
   }, 500);
 };
 
+// ガチャ履歴（選ばれた1頭ずつ追加）
+const gachaHistory = ref([]);
+
+// ガチャ結果をローカルストレージに保存（選ばれた1頭だけ追加）
+const saveToLocalStorage = (horseName) => {
+  if (!horseName) return;
+
+  console.log("選ばれた馬:", horseName);
+
+  // すでに同じ馬が履歴にある場合は追加しない（重複防止）
+  gachaHistory.value.push(horseName);
+
+  console.log("履歴リスト:", gachaHistory.value);
+
+  // 履歴をローカルストレージに保存
+  localStorage.setItem('gachaHistory', JSON.stringify(gachaHistory.value));
+};
+
+// `isRolling` の変化を監視し、ガチャが止まったら履歴に追加
+watch(isRolling, (newState) => {
+  if (!newState && selectedHorse.value) {
+    console.log("ガチャ終了！選ばれたのは:", selectedHorse.value);
+    saveToLocalStorage(selectedHorse.value);
+  }
+});
+
+// ローカルストレージから履歴を取得
+const loadFromLocalStorage = () => {
+  const savedData = localStorage.getItem('gachaHistory');
+  if (savedData) {
+    gachaHistory.value = JSON.parse(savedData);
+    console.log("ローカルストレージから復元:", gachaHistory.value);
+  }
+};
+
 // ライフサイクルフック
 // コンポーネントがマウントされた後に実行
 onMounted(() => {
@@ -37,6 +72,7 @@ onMounted(() => {
 
   fetchScrapedHorses(); // スクレイピングを実行
   startLoadingAnimation(); // ローディングアニメーションを開始
+  loadFromLocalStorage(); // ローカルストレージの履歴を復元
 });
 </script>
 
@@ -70,6 +106,16 @@ onMounted(() => {
       <a class="btn btn-border-gradient" @click.prevent="startGacha">
         <span class="btn-text-gradient--gold">ガチャを回す</span>
       </a>
+    </div>
+
+    <!-- ガチャ履歴表示 -->
+    <div v-if="gachaHistory.length > 0" class="history">
+      <h2>過去のガチャ結果</h2>
+      <ul>
+        <li v-for="(horse, index) in gachaHistory" :key="index">
+          {{ horse }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -126,13 +172,14 @@ body {
 
 /* メッセージエリアの高さを固定 */
 .message-area {
-  min-height: 300px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   font-size: 40px;
-  margin: 70px 0;
+  margin-top: 50px;
+  margin-bottom: 20px;
 }
 
 .display-loading, .placeholder {
@@ -344,5 +391,37 @@ a.btn-border-gradient {
   -webkit-background-clip: text;
 
   -webkit-text-fill-color: transparent;
+}
+
+/* ガチャ履歴 */
+.history {
+  margin-top: 80px;
+  padding: 15px;
+  background: #333; /* 背景を濃いグレー */
+  border-radius: 10px;
+  border: 2px solid #FFD700; /* ゴールドの枠線 */
+  color: #fff; /* 白文字 */
+  text-align: center;
+}
+
+.history h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #FFD700; /* ゴールドのタイトル */
+}
+
+.history ul {
+  list-style: none;
+  padding: 0;
+}
+
+.history li {
+  padding: 8px 0;
+  font-size: 18px;
+  border-bottom: 1px solid #555; /* 区切り線を暗めのグレー */
+}
+
+.history li:last-child {
+  border-bottom: none; /* 最後の項目の線を消す */
 }
 </style>

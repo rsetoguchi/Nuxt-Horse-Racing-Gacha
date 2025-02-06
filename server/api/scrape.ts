@@ -70,7 +70,8 @@ export default defineEventHandler(async () => {
     const formattedDate = `${year}${month}${day}`
 
     // 高知競馬のレース一覧ページ
-    const raceListUrl = `https://nar.netkeiba.com/top/race_list.html?kaisai_id=${year}54${month}${day}&kaisai_date=${formattedDate}&rf=race_list`;
+    // const raceListUrl = `https://nar.netkeiba.com/top/race_list.html?kaisai_id=${year}54${month}${day}&kaisai_date=${formattedDate}&rf=race_list`;
+    const raceListUrl = 'https://nar.netkeiba.com/top/race_list.html?kaisai_id=2025540205&kaisai_date=20250205&rf=race_list'; // 開催されて無い日は過去のURLを固定（開発中のみ）
     
     console.log(`高知競馬のレース一覧URL: ${raceListUrl}`);
 
@@ -88,7 +89,8 @@ export default defineEventHandler(async () => {
 
     // 高知ファイナル出走馬リストのページURL
     const raceId = `${year}54${month}${day}${finalRaceNumber.padStart(2, '0')}`;
-    const raceUrl = `https://nar.netkeiba.com/race/shutuba.html?race_id=${raceId}&rf=race_list`;
+    // const raceUrl = `https://nar.netkeiba.com/race/shutuba.html?race_id=${raceId}&rf=race_list`;
+    const raceUrl = 'https://nar.netkeiba.com/race/shutuba.html?race_id=202554020509&rf=race_list'; // 開催されて無い日は過去のURLを固定（開発中のみ）
     console.log(`スクレイピング対象レースURL: ${raceUrl}`);
 
     // 出走馬名を取得
