@@ -7,7 +7,7 @@
 
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUpdate } from 'vue';
 import { useScrapedHorses } from "~/composables/useScrapedHorses";
 import { useGacha } from "~/composables/useGacha";
 
@@ -18,13 +18,12 @@ const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames); //
 // `loading...` のアニメーション用
 const msg = 'Now Loading'
 const loadingText = ref(msg);
-let loadingInterval = null;
 
 // ローディングアニメーションを開始する関数
 const startLoadingAnimation = () => {
   const states = [msg, `${msg}.`, `${msg}..`, `${msg}...`];
   let index = 0;
-  loadingInterval = setInterval(() => {
+  setInterval(() => {
     loadingText.value = states[index];
     index = (index + 1) % states.length; // 0,1,2,3 のループ
   }, 500);
@@ -48,12 +47,25 @@ const saveToLocalStorage = (horseName) => {
   localStorage.setItem('gachaHistory', JSON.stringify(gachaHistory.value));
 };
 
-// `isRolling` の変化を監視し、ガチャが止まったら履歴に追加
+// ガチャ履歴の削除（1件ずつ）
+const deleteHorse = (index) => {
+  gachaHistory.value.splice(index, 1); // 指定したインデックスの履歴を削除
+
+  // ローカルストレージを更新
+  localStorage.setItem('gachaHistory', JSON.stringify(gachaHistory.value));
+};
+
+// isRolling の変化を監視し、ガチャが止まったら履歴に追加
 watch(isRolling, (newState) => {
   if (!newState && selectedHorse.value) {
     console.log("ガチャ終了！選ばれたのは:", selectedHorse.value);
     saveToLocalStorage(selectedHorse.value);
   }
+});
+
+// ガチャを回したらリセットメッセージを消す
+watch(selectedHorse, () => {
+  resetMessage.value = "";
 });
 
 // ローカルストレージから履歴を取得
@@ -65,6 +77,17 @@ const loadFromLocalStorage = () => {
   }
 };
 
+// 履歴リセット時のメッセージ
+const resetMessage = ref("");
+// リセット処理中かどうか
+const isResetting = ref(false);
+
+// 全履歴をリセットする関数
+const resetHistory = () => {
+  // リセット処理開始フラグ
+  isResetting.value = true;
+};
+
 // ライフサイクルフック
 // コンポーネントがマウントされた後に実行
 onMounted(() => {
@@ -73,6 +96,28 @@ onMounted(() => {
   fetchScrapedHorses(); // スクレイピングを実行
   startLoadingAnimation(); // ローディングアニメーションを開始
   loadFromLocalStorage(); // ローカルストレージの履歴を復元
+});
+
+// onBeforeUpdate()：コンポーネントがリアクティブな状態変更により「仮想DOMの更新を実行する直前」に呼び出されるフックを登録する。このフックの後、実際の DOM 更新が行われる。
+// リセット確認ダイアログを出す
+onBeforeUpdate(() => {
+  if (isResetting.value) {
+    console.log("onBeforeUpdate: 確認ダイアログを表示");
+    const confirmation = window.confirm("ガチャ結果の履歴がすべて消えますがよろしいですか？");
+    if (confirmation) {
+      gachaHistory.value = []; // メモリ上の履歴をリセット
+      localStorage.removeItem('gachaHistory'); // ローカルストレージの履歴も削除
+      resetMessage.value = "ガチャ履歴をリセットしました"; // メッセージを表示
+      console.log("履歴がリセットされました");
+    }
+
+    // 3秒後にメッセージを消す
+    setTimeout(() => {
+      resetMessage.value = "";
+    }, 3000);
+
+    isResetting.value = false; // フラグをリセット
+  }
 });
 </script>
 
@@ -114,9 +159,19 @@ onMounted(() => {
       <ul>
         <li v-for="(horse, index) in gachaHistory" :key="index">
           {{ horse }}
+          <button @click="deleteHorse(index)" class="delete-btn">削除</button>
         </li>
       </ul>
     </div>
+
+    <!-- 全履歴リセットボタン -->
+    <button v-if="gachaHistory.length > 0" @click="resetHistory" class="reset-btn">全履歴リセット</button>
+
+    <!-- リセット後のメッセージ -->
+    <p v-if="resetMessage" class="reset-message">{{ resetMessage }}</p>
+
+    <!-- 今回はライフサイクルを学ぶため、敢えて onBeforeUpdate() を発火させる -->
+    <span v-if="isResetting" style="display: none;"></span>
   </div>
 </template>
 
@@ -395,19 +450,20 @@ a.btn-border-gradient {
 
 /* ガチャ履歴 */
 .history {
-  margin-top: 80px;
-  padding: 15px;
-  background: #333; /* 背景を濃いグレー */
+  margin-top: 70px;
   border-radius: 10px;
-  border: 2px solid #FFD700; /* ゴールドの枠線 */
-  color: #fff; /* 白文字 */
+  /* border: 2px solid #FFD700; */
+  color: #fff;
   text-align: center;
+  max-width: 450px; /* 履歴全体を中央寄せ */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .history h2 {
   font-size: 20px;
   margin-bottom: 10px;
-  color: #FFD700; /* ゴールドのタイトル */
+  color: #FFD700;
 }
 
 .history ul {
@@ -416,12 +472,61 @@ a.btn-border-gradient {
 }
 
 .history li {
-  padding: 8px 0;
+  padding: 10px 15px;
   font-size: 18px;
-  border-bottom: 1px solid #555; /* 区切り線を暗めのグレー */
+  border-bottom: 1px solid #555;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  gap: 20px; /* 馬名と削除ボタンの間隔を適度に確保 */
 }
 
 .history li:last-child {
-  border-bottom: none; /* 最後の項目の線を消す */
+  border-bottom: none;
+}
+
+/* 削除ボタン */
+.delete-btn {
+  background: transparent;
+  color: red;
+  border: 2px solid red;
+  padding: 5px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s ease-in-out;
+}
+
+.delete-btn:hover {
+  background: red;
+  color: white;
+}
+
+/* リセットメッセージ */
+.reset-message {
+  color: #FFD700;
+  font-size: 20px;
+  text-align: center;
+  margin-top: 70px;
+}
+
+/* 全履歴リセットボタン */
+.reset-btn {
+  display: block;
+  margin: 50px auto;
+  background: transparent;
+  color: red;
+  border: 2px solid red;
+  padding: 8px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s ease-in-out;
+}
+
+.reset-btn:hover {
+  background: red;
+  color: white;
 }
 </style>
