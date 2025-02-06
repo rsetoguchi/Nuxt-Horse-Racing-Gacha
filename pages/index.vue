@@ -7,7 +7,7 @@
 
 // インデント不要（Vue公式の推奨スタイル）→ <script setup>内のコードは 通常のJavaScriptのように記述する のが推奨されているため
 
-import { ref, onMounted, onBeforeUpdate } from 'vue';
+import { ref, onMounted, onBeforeUpdate, onUpdated } from 'vue';
 import { useScrapedHorses } from "~/composables/useScrapedHorses";
 import { useGacha } from "~/composables/useGacha";
 
@@ -31,6 +31,9 @@ const startLoadingAnimation = () => {
 
 // ガチャ履歴（選ばれた1頭ずつ追加）
 const gachaHistory = ref([]);
+
+// ガチャ履歴の最大件数
+const HISTORY_LIMIT = 5;
 
 // ガチャ結果をローカルストレージに保存（選ばれた1頭だけ追加）
 const saveToLocalStorage = (horseName) => {
@@ -119,6 +122,20 @@ onBeforeUpdate(() => {
     isResetting.value = false; // フラグをリセット
   }
 });
+
+// onUpdated()：コンポーネントの状態が更新された時に実行
+// 履歴が変更されたら最新10件に制限
+onUpdated(() => {
+  if (gachaHistory.value.length > HISTORY_LIMIT) {
+    console.log(`履歴が${gachaHistory.value.length}件になったので、古いデータを削除します`);
+    
+    // 古い履歴を削除（最も古いものを削除）
+    gachaHistory.value.splice(0, gachaHistory.value.length - HISTORY_LIMIT);
+    
+    // ローカルストレージを更新
+    localStorage.setItem('gachaHistory', JSON.stringify(gachaHistory.value));
+  }
+});
 </script>
 
 <!-- コンポーネントのビュー部分を定義 -->
@@ -155,7 +172,7 @@ onBeforeUpdate(() => {
 
     <!-- ガチャ履歴表示 -->
     <div v-if="gachaHistory.length > 0" class="history">
-      <h2>過去のガチャ結果</h2>
+      <h2>ガチャ結果　※最新5件</h2>
       <ul>
         <li v-for="(horse, index) in gachaHistory" :key="index">
           {{ horse }}
@@ -233,7 +250,7 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 40px;
-  margin-top: 50px;
+  margin-top: 40px;
   margin-bottom: 20px;
 }
 
@@ -450,7 +467,7 @@ a.btn-border-gradient {
 
 /* ガチャ履歴 */
 .history {
-  margin-top: 70px;
+  margin-top: 50px;
   border-radius: 10px;
   /* border: 2px solid #FFD700; */
   color: #fff;
@@ -514,7 +531,7 @@ a.btn-border-gradient {
 /* 全履歴リセットボタン */
 .reset-btn {
   display: block;
-  margin: 50px auto;
+  margin: 20px auto;
   background: transparent;
   color: red;
   border: 2px solid red;
