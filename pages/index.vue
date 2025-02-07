@@ -11,6 +11,9 @@ import { ref, onMounted, onBeforeUpdate, onUpdated } from 'vue';
 import { useScrapedHorses } from "~/composables/useScrapedHorses";
 import { useGacha } from "~/composables/useGacha";
 
+// コンポーネントのインポート
+import GachaButton from "~/components/GachaButton.vue";
+
 // スクレイピングデータを取得するカスタムフック
 const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
 const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames); // ガチャのロジックを適用
@@ -164,11 +167,7 @@ onUpdated(() => {
       <p v-else class="placeholder">ガチャを回して結果を見よう</p>
     </div>
     
-    <div class="btn-border-gradient-wrap btn-border-gradient-wrap--gold" :class="{ 'disabled': isRolling || scrapedHorseNames.length === 0 }">
-      <a class="btn btn-border-gradient" @click.prevent="startGacha">
-        <span class="btn-text-gradient--gold">ガチャを回す</span>
-      </a>
-    </div>
+    <GachaButton :startGacha="startGacha" :isRolling="isRolling" :isDisabled="scrapedHorseNames.length === 0" />
 
     <!-- ガチャ履歴表示 -->
     <div v-if="gachaHistory.length > 0" class="history">
@@ -371,98 +370,6 @@ html {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 62.5%;
-}
-
-.btn,
-a.btn,
-button.btn {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1.5;
-  position: relative;
-  display: inline-block;
-  padding: 1rem 4rem;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-  text-align: center;
-  vertical-align: middle;
-  text-decoration: none;
-  letter-spacing: 0.1em;
-  color: #212529;
-  border-radius: 0.5rem;
-}
-
-.btn-border-gradient-wrap {
-  display: inline-block;
-
-  padding: 0.2rem;
-
-  border-radius: 0.5rem;
-}
-
-/* ボタンを無効化するスタイル */
-.btn-border-gradient-wrap.disabled {
-  pointer-events: none; /* クリックを無効化 */
-  opacity: 0.5; /* 視覚的に無効化されていることを示す */
-}
-
-.btn-border-gradient-wrap--gold {
-  background-image: -webkit-linear-gradient(
-    315deg,
-    #704308 0%,
-    #ffce08 37%,
-    #fefeb2 47%,
-    #fafad6 50%,
-    #fefeb2 53%,
-    #e1ce08 63%,
-    #704308 100%
-  );
-  background-image: linear-gradient(
-    135deg,
-    #704308 0%,
-    #ffce08 37%,
-    #fefeb2 47%,
-    #fafad6 50%,
-    #fefeb2 53%,
-    #e1ce08 63%,
-    #704308 100%
-  );
-}
-
-.btn-border-gradient-wrap--gold:hover a.btn {
-  text-shadow: 0 0 15px rgba(250, 250, 214, 0.5),
-    0 0 15px rgba(250, 250, 214, 0.5), 0 0 15px rgba(250, 250, 214, 0.5),
-    0 0 15px rgba(250, 250, 214, 0.5);
-}
-
-a.btn-border-gradient {
-  font-size: 2rem;
-  background: #000;
-}
-
-.btn-text-gradient--gold {
-  font-family: "ヒラギノ明朝 Pro W3", "Hiragino Mincho Pro",
-    "Hiragino Mincho ProN", "HGS明朝E", "ＭＳ Ｐ明朝", serif;
-
-  background: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    from(#ffffdb),
-    to(#a16422)
-  );
-
-  background: -webkit-linear-gradient(bottom, #ffffdb, #a16422);
-
-  background: linear-gradient(to top, #ffffdb, #a16422);
-  -webkit-background-clip: text;
-
-  -webkit-text-fill-color: transparent;
 }
 
 /* ガチャ履歴 */
