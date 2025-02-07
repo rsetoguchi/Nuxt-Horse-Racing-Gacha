@@ -13,6 +13,7 @@ import { useGacha } from "~/composables/useGacha";
 
 // コンポーネントのインポート
 import GachaButton from "~/components/GachaButton.vue";
+import GachaResult from "~/components/GachaResult.vue";
 
 // スクレイピングデータを取得するカスタムフック
 const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
@@ -157,16 +158,10 @@ onUpdated(() => {
       <p v-else-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
       <!-- ガチャ結果を表示 -->
-      <p v-else-if="selectedHorse">
-        <span v-if="!isRolling">🎉🎉🎉 </span>
-        <strong id="selected-horse-name">{{ selectedHorse }}</strong>
-        <span v-if="!isRolling"> 🎉🎉🎉</span>
-      </p>
-
-      <!-- ボタン押下前のテンプレート -->
-      <p v-else class="placeholder">ガチャを回して結果を見よう</p>
+      <GachaResult :selectedHorse="selectedHorse" :isRolling="isRolling" :isLoading="isLoading" />
     </div>
     
+    <!-- ガチャを回すボタン -->
     <GachaButton :startGacha="startGacha" :isRolling="isRolling" :isDisabled="scrapedHorseNames.length === 0" />
 
     <!-- ガチャ履歴表示 -->
@@ -253,22 +248,6 @@ body {
   margin-bottom: 20px;
 }
 
-.display-loading, .placeholder {
-  font-size: 40px;
-  font-weight: bold;
-}
-
-/* デフォルトのメッセージ（ボタン位置がずれないように空白を埋める） */
-.placeholder, #selected-horse-name {
-  font-family: 'ヒラギノ明朝 Pro W3', 'Hiragino Mincho Pro', 'Hiragino Mincho ProN', 'HGS明朝E', 'ＭＳ Ｐ明朝', serif;
-  padding: 1rem 2rem;
-  /* color: #fff; */
-  background-image: -webkit-linear-gradient(315deg, #b8751e 0%, #ffce08 37%, #fefeb2 47%, #fafad6 50%, #fefeb2 53%, #e1ce08 63%, #b8751e 100%);
-  background-image: linear-gradient(135deg, #b8751e 0%, #ffce08 37%, #fefeb2 47%, #fafad6 50%, #fefeb2 53%, #e1ce08 63%, #b8751e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .error-message {
   color: red;
   font-weight: bold;
@@ -276,8 +255,11 @@ body {
 
 /* Now Loading... のアニメーションを適用 */
 .display-loading {
+  font-size: 40px;
+  font-weight: bold;
   color: rgb(168, 166, 166);
   animation: fadeBlink 1.5s infinite;
+  margin-bottom: 0;
 }
 
 /* `Now Loading...` の表示を調整 */
