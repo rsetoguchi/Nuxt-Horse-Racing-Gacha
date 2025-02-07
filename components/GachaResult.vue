@@ -1,8 +1,7 @@
 <script setup>
 defineProps({
   selectedHorse: String,
-  isRolling: Boolean,
-  isLoading: Boolean
+  isRolling: Boolean
 });
 </script>
 

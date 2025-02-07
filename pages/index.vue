@@ -158,7 +158,7 @@ onUpdated(() => {
       <p v-else-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
       <!-- ガチャ結果を表示 -->
-      <GachaResult :selectedHorse="selectedHorse" :isRolling="isRolling" :isLoading="isLoading" />
+      <GachaResult :selectedHorse="selectedHorse" :isRolling="isRolling" />
     </div>
     
     <!-- ガチャを回すボタン -->
