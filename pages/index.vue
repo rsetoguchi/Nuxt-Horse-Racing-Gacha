@@ -15,6 +15,7 @@ import { useGacha } from "~/composables/useGacha";
 import GachaButton from "~/components/GachaButton.vue";
 import GachaResult from "~/components/GachaResult.vue";
 import LoadingIndicator from "~/components/LoadingIndicator.vue";
+import ErrorMessage from "~/components/ErrorMessage.vue";
 
 // スクレイピングデータを取得するカスタムフック
 const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
@@ -153,7 +154,7 @@ onUpdated(() => {
       <LoadingIndicator :isLoading="isLoading" :loadingText="loadingText" />
 
       <!-- エラーメッセージを表示 -->
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <ErrorMessage :errorMessage="errorMessage" />
 
       <!-- ガチャ結果を表示 -->
       <GachaResult :selectedHorse="selectedHorse" :isRolling="isRolling" />
@@ -244,11 +245,6 @@ body {
   font-size: 40px;
   margin-top: 40px;
   margin-bottom: 20px;
-}
-
-.error-message {
-  color: red;
-  font-weight: bold;
 }
 
 /* button */
