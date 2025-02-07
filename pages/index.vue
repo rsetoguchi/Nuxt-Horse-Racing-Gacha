@@ -14,12 +14,13 @@ import { useGacha } from "~/composables/useGacha";
 // コンポーネントのインポート
 import GachaButton from "~/components/GachaButton.vue";
 import GachaResult from "~/components/GachaResult.vue";
+import LoadingIndicator from "~/components/LoadingIndicator.vue";
 
 // スクレイピングデータを取得するカスタムフック
 const { scrapedHorseNames, isLoading, errorMessage, fetchScrapedHorses } = useScrapedHorses(); // スクレイピングデータを取得
 const { selectedHorse, isRolling, startGacha } = useGacha(scrapedHorseNames); // ガチャのロジックを適用
 
-// `loading...` のアニメーション用
+// Now Loading... のアニメーション用
 const msg = 'Now Loading'
 const loadingText = ref(msg);
 
@@ -148,14 +149,11 @@ onUpdated(() => {
     <h1 id="index-page-title">🏇 高知ファイナル 本命馬決定ガチャ 🏇</h1>
 
     <div class="message-area">
-      <!-- スクレイピング中は「loading...」を表示 -->
-      <div v-if="isLoading" class="loading-container">
-        <span class="loader"><span class="loader-inner"></span></span>
-        <p class="display-loading">{{ loadingText }}</p>
-      </div>
+      <!-- スクレイピング中は「Now Loading...」を表示 -->
+      <LoadingIndicator :isLoading="isLoading" :loadingText="loadingText" />
 
       <!-- エラーメッセージを表示 -->
-      <p v-else-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
       <!-- ガチャ結果を表示 -->
       <GachaResult :selectedHorse="selectedHorse" :isRolling="isRolling" />
@@ -251,93 +249,6 @@ body {
 .error-message {
   color: red;
   font-weight: bold;
-}
-
-/* Now Loading... のアニメーションを適用 */
-.display-loading {
-  font-size: 40px;
-  font-weight: bold;
-  color: rgb(168, 166, 166);
-  animation: fadeBlink 1.5s infinite;
-  margin-bottom: 0;
-}
-
-/* `Now Loading...` の表示を調整 */
-.loading-container {
-  display: flex;
-  flex-direction: column; /* 縦並び */
-  align-items: center;
-  gap: 10px;
-}
-
-/* `Now Loading...` を点滅させる */
-@keyframes fadeBlink {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* Loadingアイコンのアニメーション */
-.loader {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  position: relative;
-  border: 4px solid #Fff;
-  top: 50%;
-  animation: loader 2s infinite ease;
-}
-
-.loader-inner {
-  vertical-align: top;
-  display: inline-block;
-  width: 100%;
-  background-color: #fff;
-  animation: loader-inner 2s infinite ease-in;
-}
-
-@keyframes loader {
-  0% {
-    transform: rotate(0deg);
-  }
-  
-  25% {
-    transform: rotate(180deg);
-  }
-  
-  50% {
-    transform: rotate(180deg);
-  }
-  
-  75% {
-    transform: rotate(360deg);
-  }
-  
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes loader-inner {
-  0% {
-    height: 0%;
-  }
-  
-  25% {
-    height: 0%;
-  }
-  
-  50% {
-    height: 100%;
-  }
-  
-  75% {
-    height: 100%;
-  }
-  
-  100% {
-    height: 0%;
-  }
 }
 
 /* button */
