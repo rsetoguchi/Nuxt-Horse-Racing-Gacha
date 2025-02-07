@@ -165,7 +165,7 @@ onUpdated(() => {
     <GachaButton :startGacha="startGacha" :isRolling="isRolling" :isDisabled="scrapedHorseNames.length === 0" />
 
     <!-- ガチャ履歴表示 -->
-    <GachaHistory :gachaHistory="gachaHistory" :deleteHorse="deleteHorse" :resetMessage="resetMessage" :resetHistory="resetHistory" :gachaHistoryLength="gachaHistory.length" />
+    <GachaHistory :gachaHistory="gachaHistory" :deleteHorse="deleteHorse" :resetMessage="resetMessage" :resetHistory="resetHistory" :gachaHistoryLength="gachaHistory.length" :isResetting="isResetting" />
   </div>
 </template>
 

@@ -4,7 +4,8 @@ defineProps({
   deleteHorse: Function,
   resetMessage: String,
   resetHistory: Function,
-  gachaHistoryLength: Number
+  gachaHistoryLength: Number,
+  isResetting: Boolean
 });
 </script>
 
